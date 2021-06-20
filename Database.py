@@ -18,8 +18,8 @@ class Database:
         self.conn.commit()
         return result
 
-    def check_user_exits(self, user_id: int):
-        res = self.cur.execute("SELECT * FROM users WHERE user_id=?", (user_id,)).fetchall()
+    def check_user_exists(self, user_id):
+        res = self.execute("SELECT * FROM users WHERE user_id=?", (user_id,))
         return bool(len(res))
 
     def add_user(self, user_id):
