@@ -26,11 +26,11 @@ class Database:
         with self.conn:
             if not self.check_user_exits(user_id):
                 us = User()
-                return self.execute("INSERT INTO users VALUES (?,?)", (user_id, pickle.dumps(us)))
+                self.execute("INSERT INTO users VALUES (?,?)", (user_id, pickle.dumps(us)))
 
     def update_data(self, user_id, data):
         if self.check_user_exits(user_id):
-            return self.execute("UPDATE users SET data = ? WHERE user_id = ?", (data, user_id))
+            return self.execute("UPDATE users SET data = ? WHERE user_id = ?", (pickle.dumps(data), user_id))
         self.add_user(user_id)
         self.update_data(user_id)
 

@@ -32,7 +32,6 @@ def help_send(msg):
 def months_send(msg):
     db = Database()
     us = db.get_data(user_id=msg.from_user.id)
-    print(us.month_spending)
     bot.send_message(msg.chat.id, f"Потраченные за месяц деньги: {us.month_spending}")
 
 @bot.message_handler(content_types=['text'])
@@ -40,7 +39,10 @@ def text_handler(msg):
     db = Database()
     us = db.get_data(user_id=msg.from_user.id)
     if re.match(r'\d+\s\w+', msg.text):
-        us.spend_money(int(msg.text.split()[0]), msg.text.split()[1])
+        money = int(msg.text.split()[0])
+        wtf = msg.text.split()[1]
+        us.spend_money(money, wtf)
+        db.update_data(msg.from_user.id, us)
     else:
         bot.reply_to(msg, "Я не понимаю")
 
