@@ -40,7 +40,7 @@ def help_send(msg):
 def day_send(msg):
     db = Database()
     us = db.get_data(user_id=msg.from_user.id)
-    result = dick(us.day_logs) + f'   <b>Сумма</b>: {us.day_spending}'
+    result = dick(us.day_logs) + f'\n   <b>Сумма</b>: {us.day_spending}'
     bot.send_message(msg.chat.id,
                      f"""Потраченные за день деньги:      
 {result}""",
