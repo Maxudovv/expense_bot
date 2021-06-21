@@ -56,11 +56,16 @@ def months_send(msg):
 {result}""",
                      parse_mode='html')
 
+
+# @bot.message_handler(commands=['setsalary'])
+# def send_setsalary(msg):
+#     bot.register_next_step_handler(bot.send_message(msg.chat.id, "Введите деньги, которые вы хотите добавить в кошелёк"), set_salary)
+
 @bot.message_handler(content_types=['text'])
 def text_handler(msg):
     db = Database()
     us = db.get_data(user_id=msg.from_user.id)
-    if re.match(r'\d+\s\w+\s*\w*', msg.text): # Вытаскиваем только сообщения формата: 100 Такси
+    if re.match(r'\d+\s[А-Яа-я]+\s*[А-Яа-я]*', msg.text): # Вытаскиваем только сообщения формата: 100 Такси
         money = int(msg.text.split()[0])
         wtf = msg.text.replace(str(money),''.title()).strip()
         us.spend_money(money, wtf)
@@ -68,32 +73,41 @@ def text_handler(msg):
         bot.send_message(
             msg.chat.id, "Успешно добавлено\n"
         )
-    elif re.match(r'del\s\d*\s*\w+\s*\w*', msg.text): # Вытаскиваем только сообщения формата: del 100 Такси
+    elif re.match(r'del\s\d*\s*[А-Яа-я]+\s*[А-Яа-я]*', msg.text): # Вытаскиваем только сообщения формата: del 100 Такси
         msg.text = msg.text.replace('del ', '')
-        print(msg.text)
         if len(msg.text.split()) >= 1:
-            print('1')
-            print(us.logs)
-            if re.match(r'\w+\s*\w*', msg.text):
-                wtf = msg.text.strip().title()
-                print('2')
+            if re.match(r'[А-Яа-я]+\s*[А-Яа-я]*', msg.text):
+                wtf = msg.text.split()[1].strip().title()
                 if wtf in us.logs:
-                    print('3')
                     us.month_spending -= us.logs[wtf]
+                    us.day_spending -= us.logs[wtf]
                     del us.logs[wtf]
                     del us.day_logs[wtf]
                     db.update_data(msg.from_user.id, us)
                     bot.send_message(msg.chat.id, "Успешно удалено")
                 else:
                     pass
-            elif re.match(r'\d+\s\w+', msg.text):
-                wtf = msg.text.split()[1].title()
+            elif re.match(r'\d+\s[А-Яа-я]+', msg.text):
+                wtf = msg.text.split()[1].strip().title()
                 value = int(msg.text.split()[0])
                 us.logs.update({wtf : us.logs[wtf] - value})
+                us.day_logs.update({wtf: us.day_logs[wtf] - value})
+                us.month_spending -= us.logs[wtf]
+                us.day_spending -= us.day_logs[wtf]
                 db.update_data(msg.from_user.id, us)
                 bot.send_message(msg.chat.id, "Успешно удалено")
     else:
         bot.reply_to(msg, f"Я не понимаю")
+
+# def set_salary(msg):
+#     if re.match(r'\d+'):
+#         db = Database
+#         us = db.get_data(msg.from_user.id)
+#         us.add_money(int(msg.text))
+#         db.update_data(msg.from_user.id, us)
+#         bot.send_message(msg.chat.id, "Деньги успешно добавлены")
+#    else:
+
 
 
 
