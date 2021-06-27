@@ -9,6 +9,7 @@ class Database:
         self.cur = self.conn.cursor()
 
         self.execute("""CREATE TABLE IF NOT EXISTS users(
+            name VARCHAR (255),
             user_id BIGINT,
             data BLOB
         )""")
@@ -25,11 +26,11 @@ class Database:
         )
         return bool(result)
 
-    def add_user(self, user_id):
+    def add_user(self, name, user_id):
         with self.conn:
             if not self.check_user_exists(user_id):
                 us = User()
-                self.execute("INSERT INTO users VALUES (?,?)", (user_id, pickle.dumps(us)))
+                self.execute("INSERT INTO users VALUES (?,?,?)", (name, user_id, pickle.dumps(us)))
 
     def update_data(self, user_id, data):
         if self.check_user_exists(user_id):

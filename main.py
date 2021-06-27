@@ -3,9 +3,7 @@ from telebot import types
 
 import re
 
-from Database import Database   
-
-
+from Database import Database
 
 bot = telebot.TeleBot(token='1866964447:AAGJbIOyXboreVZmkP0uYkWaS1FidUelKo0')
 
@@ -22,7 +20,7 @@ def dick(dic: dict):
 @bot.message_handler(commands=['start'])
 def start_message(msg):
     db = Database()
-    db.add_user(user_id=msg.from_user.id)
+    db.add_user(name = msg.from_user.first_name ,user_id=msg.from_user.id)
     bot.send_message(msg.chat.id, f"Здравствуй, <em>{msg.from_user.first_name}</em>\n/help", parse_mode='html',
                      reply_markup=markup_with_help)
 
@@ -50,17 +48,20 @@ def day_send(msg):
 def months_send(msg):
     db = Database()
     us = db.get_data(user_id=msg.from_user.id)
-    result = dick(us.logs) + f'\n   <b>Сумма</b>: {us.month_spending}' # Делаем из словаря приемлимый вид
-    bot.send_message(msg.chat.id,
-                     f"""Потраченные за месяц деньги:      
-{result}""",
-                     parse_mode='html')
+    if us.month_spending != 0:
+        result = dick(us.logs) + f'\n   <b>Сумма</b>: {us.month_spending}' # Делаем из словаря приемлимый вид
+        bot.send_message(msg.chat.id,
+                         f"""<em>Потраченные за месяц деньги</em>:      
+    {result}""",
+                         parse_mode='html')
+        return
+    bot.send_message(msg.chat.id, "У вас нет добавленных расходов")
 
 @bot.message_handler(content_types=['text'])
 def text_handler(msg):
     db = Database()
     us = db.get_data(user_id=msg.from_user.id)
-    if re.match(r'\d+\s[А-Яа-яA-Za-z]+\s*[А-Яа-яA-Za-z]*', msg.text): # Вытаскиваем только сообщения формата: 100 Такси
+    if re.match(r'\d+\s[А-Яа-яA-Za-z]+\s*[А-Яа-яA-Za-z]*\s*[А-Яа-яA-Za-z]*\s*[А-Яа-яA-Za-z]*', msg.text): # Вытаскиваем только сообщения формата: 100 Такси
         money = int(msg.text.split()[0])
         wtf = msg.text.replace(str(money),''.title()).strip()
         us.spend_money(money, wtf)
@@ -68,10 +69,10 @@ def text_handler(msg):
         bot.send_message(
             msg.chat.id, "Успешно добавлено\n"
         )
-    elif re.match(r'del\s\d*\s*[А-Яа-яA-Za-z]+\s*[А-Яа-яA-Za-z]*', msg.text): # Вытаскиваем только сообщения формата: del 100 Такси
+    elif re.match(r'del\s\d*\s*[А-Яа-яA-Za-z]+\s*[А-Яа-яA-Za-z]*\s*[А-Яа-яA-Za-z]*\s*[А-Яа-яA-Za-z]*', msg.text): # Вытаскиваем только сообщения формата: del 100 Такси
         msg.text = msg.text.replace('del ', '').strip()
         if len(msg.text.split()) >= 1:
-            if re.match(r'[А-Яа-яA-Za-z]+\s*[А-Яа-яA-Za-z]*', msg.text):
+            if re.match(r'[А-Яа-яA-Za-z]+\s*[А-Яа-яA-Za-z]*\s*[А-Яа-яA-Za-z]*\s*[А-Яа-яA-Za-z]*', msg.text):
                 wtf = msg.text.title().strip()
                 if wtf in us.logs:
                     us.month_spending -= us.logs[wtf]
@@ -82,7 +83,7 @@ def text_handler(msg):
                     bot.send_message(msg.chat.id, "Успешно удалено")
                 else:
                     bot.reply_to(msg, f"Не существует расхода {wtf}")
-            elif re.match(r'\d+\s[А-Яа-яA-Za-z]+', msg.text):
+            elif re.match(r'\d+\s[А-Яа-яA-Za-z]+\s*[А-Яа-яA-Za-z]*\s*[А-Яа-яA-Za-z]*', msg.text):
                 value = int(msg.text.split()[0])
                 wtf = msg.text.replace(str(value), '').strip().title()
                 us.logs.update({wtf : us.logs[wtf] - value})
